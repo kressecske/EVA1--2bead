@@ -181,6 +181,7 @@ public:
         end = e;
     }
     void set_pause(bool p){
+        if(end) return;
         if(p){
             _timer->stop();
             _gameTimer->stop();
