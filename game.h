@@ -28,11 +28,15 @@ private:
     QTimer *_timer;
     bool end;
     bool pause;
+    int gameTime;
+    QTimer *_gameTimer;
 signals:
-    void gameOver(bool,int);
+    void gameOver(bool,int,int);
     void tableChanged();
+    void gameTimeChanged(int);
 public slots:
     void moveVador(){
+
         if(end || pause) return;
         foreach(VadOr* vador, vadorok){
             int d = vador->get_d();
@@ -81,12 +85,18 @@ public slots:
         }
         check_game_end();
     }
+    void addGameTime(){
+        gameTime++;
+        emit gameTimeChanged(gameTime);
+    }
 public:
     Game(QString loc){
         _timer = new QTimer();
-        _timer->setInterval(1000);
+        _gameTimer = new QTimer();
+        _timer->setInterval(750);
+        _gameTimer->setInterval(1000);
         connect(_timer, SIGNAL(timeout()), this, SLOT(moveVador()));
-
+        connect(_gameTimer, SIGNAL(timeout()), this, SLOT(addGameTime()));
         newGame(loc);
 
     }
@@ -114,7 +124,7 @@ public:
         fak.clear();
         piknikkosarak.clear();
         gametable.clear();
-
+        gameTime = 0;
 
         QFile file(loc);
         if(!file.open(QIODevice::ReadOnly)) {
@@ -155,7 +165,9 @@ public:
             end = false;
             pause = false;
             _timer->start();
+            _gameTimer->start();
             update_gametable();
+
         }
 
 
@@ -171,8 +183,10 @@ public:
     void set_pause(bool p){
         if(p){
             _timer->stop();
+            _gameTimer->stop();
         }else{
             _timer->start();
+            _gameTimer->start();
         }
         pause = p;
     }
@@ -240,7 +254,9 @@ public:
     bool get_end(){
         return end;
     }
-
+    int get_gameTime(){
+        return gameTime;
+    }
     bool is_next_fa(int x,int y,int d){
         switch(d){
             case 0: //UP
@@ -334,13 +350,15 @@ public:
         if(piknikkosarak.length() == 0){
             end = true;
             _timer->stop();
-            emit gameOver(true,player.get_points());
+            _gameTimer->stop();
+            emit gameOver(true,player.get_points(),gameTime);
         }
         foreach(VadOr* v,vadorok){
             if( qAbs(v->get_x() - player.get_x()) <=1 && qAbs(v->get_y() - player.get_y()) <=1 ){
                 end = true;
                 _timer->stop();
-                emit gameOver(false,player.get_points());
+                _gameTimer->stop();
+                emit gameOver(false,player.get_points(),gameTime);
             }
         }
     }

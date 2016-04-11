@@ -16,9 +16,10 @@ class UserInterface : public QWidget
 public slots:
     void newGameButton();
     void pauseButton();
-    void Over(bool b,int p);
+    void Over(bool b,int p,int t);
     void printGameTable();
     void chooseMap();
+    void gameTimePrint(int gt);
 public:
     explicit UserInterface(QWidget *parent = 0);
     ~UserInterface();
@@ -30,6 +31,7 @@ public:
     QPushButton *_exit;
     QGridLayout *_table;
     QLabel *_points;
+    QLabel *_gameTime;
     Game *_game;
     QString _map;
 
