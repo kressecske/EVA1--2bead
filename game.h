@@ -119,45 +119,48 @@ public:
         QFile file(loc);
         if(!file.open(QIODevice::ReadOnly)) {
             QMessageBox::information(0, "error", file.errorString());
-        }
+        }else{
+            QTextStream in(&file);
 
-        QTextStream in(&file);
 
+            QString line = in.readLine(); //Méret beolvasás
+            this->size = line.toInt();
 
-        QString line = in.readLine(); //Méret beolvasás
-        this->size = line.toInt();
-
-        line = in.readLine();
-        QStringList cords = line.split("\t");    //Maci Laci beolvasás
-        player = MaciLaci(Coordinate(cords[0].toInt(),cords[1].toInt()));
-
-        line = in.readLine();
-        int n = line.toInt();
-        line = in.readLine();
-        for(int i=0;i<n;i++){
-            QStringList cords = line.split("\t");    //Fák coordinátáinak beolvasás
-            fak.append(Coordinate(cords[0].toInt(),cords[1].toInt()));
             line = in.readLine();
-        }
-        n = line.toInt();
-        line = in.readLine();
-        for(int i=0;i<n;i++){
-            QStringList cords = line.split("\t");    //Vadőrők beolvasás
-            vadorok.append(new VadOr(Coordinate(cords[0].toInt(),cords[1].toInt()),cords[2].toInt()));
+            QStringList cords = line.split("\t");    //Maci Laci beolvasás
+            player = MaciLaci(Coordinate(cords[0].toInt(),cords[1].toInt()));
+
             line = in.readLine();
-        }
-        n = line.toInt();
-        line = in.readLine();
-        for(int i=0;i<n;i++){
-            QStringList cords = line.split("\t");    //Piknikkosarak beolvasás
-            piknikkosarak.append(new Coordinate(cords[0].toInt(),cords[1].toInt()));
+            int n = line.toInt();
             line = in.readLine();
+            for(int i=0;i<n;i++){
+                QStringList cords = line.split("\t");    //Fák coordinátáinak beolvasás
+                fak.append(Coordinate(cords[0].toInt(),cords[1].toInt()));
+                line = in.readLine();
+            }
+            n = line.toInt();
+            line = in.readLine();
+            for(int i=0;i<n;i++){
+                QStringList cords = line.split("\t");    //Vadőrők beolvasás
+                vadorok.append(new VadOr(Coordinate(cords[0].toInt(),cords[1].toInt()),cords[2].toInt()));
+                line = in.readLine();
+            }
+            n = line.toInt();
+            line = in.readLine();
+            for(int i=0;i<n;i++){
+                QStringList cords = line.split("\t");    //Piknikkosarak beolvasás
+                piknikkosarak.append(new Coordinate(cords[0].toInt(),cords[1].toInt()));
+                line = in.readLine();
+            }
+            end = false;
+            pause = false;
+            _timer->start();
+            update_gametable();
         }
 
-        end = false;
-        pause = false;
-        _timer->start();
-        update_gametable();
+
+
+
     }
 
 
