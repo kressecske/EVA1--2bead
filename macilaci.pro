@@ -19,11 +19,10 @@ SOURCES += main.cpp\
     vador.cpp
 
 HEADERS  += userinterface.h \
-    game.h \
     macilaci.h \
     vador.h \
-    ../../FirstProject/coordinate.h \
-    coordinate.h
+    coordinate.h \
+    game.h
 
 FORMS    += userinterface.ui
 CONFIG += c++11

@@ -1,35 +1,121 @@
 #include "userinterface.h"
 #include "ui_userinterface.h"
 #include <iostream>
+#include <QFileDialog>
+
 UserInterface::UserInterface(QWidget *parent) :
     QWidget(parent)
 {
-    _game = new Game(5);
+    setWindowTitle(trUtf8("Maci Laci!"));
+    _map = "map1.txt";
+    _game = new Game(_map);
+    _mainLayout = new QVBoxLayout(this);
 
-    _table = new QGridLayout(this);
+    _points = new QLabel();
+
+    _table = new QGridLayout();
+
+    _newGame = new QPushButton();
+    _newGame->setText("NewGame");
+    _newGame->setFocusPolicy(Qt::NoFocus);
+    _chooseMap = new QPushButton();
+    _chooseMap->setText("Choose Map File!");
+    _chooseMap->setFocusPolicy(Qt::NoFocus);
+
+    _pause = new QPushButton();
+    _pause->setText("Pause");
+    _pause->setFocusPolicy(Qt::NoFocus);
+    _exit = new QPushButton();
+    _exit->setText("Exit");
+    _exit->setFocusPolicy(Qt::NoFocus);
+
+    connect(_game,SIGNAL(tableChanged()),this,SLOT(printGameTable()));
+    connect(_game,SIGNAL(gameOver(bool,int)),this,SLOT(Over(bool,int)));
+
+    connect(_chooseMap,SIGNAL(clicked()),this,SLOT(chooseMap()));
+    connect(_exit,SIGNAL(clicked()),QApplication::instance(),SLOT(quit()));
+    connect(_newGame,SIGNAL(clicked()),this,SLOT(newGameButton()));
+    connect(_pause, SIGNAL(clicked()), this, SLOT(pauseButton()));
+
+    _menuLayout = new QHBoxLayout();
+    _menuLayout->addWidget(_newGame);
+    _menuLayout->addWidget(_chooseMap);
+    _menuLayout->addWidget(_pause);
+    _menuLayout->addWidget(_exit);
+    _mainLayout->addLayout(_menuLayout);
+    _mainLayout->addWidget(_points);
+    _mainLayout->addLayout(_table);
+
+    newGameButton();
+}
+void UserInterface::chooseMap(){
+    QString fn = QFileDialog::getOpenFileName(this,
+       tr("Open Map"), "", tr("Map txt Files (*.txt)"));
+    if (!fn.isNull()){
+        _map=fn;
+        newGameButton();
+    }
+
+}
+void UserInterface::Over(bool b,int p){
+    if(b){
+        QMessageBox::information(this, trUtf8("Játék vége"),
+                                 "Nyertél, összegyűjtötted az összes piknik kosarat\n Pontjaid: " +
+                                 QString::number(p));
+    }else{
+        QMessageBox::information(this, trUtf8("Játék vége"),
+                                 "Vesztettél, elkapott egy vadőr\n Pontjaid: " +
+                                 QString::number(p));
+    }
+}
+void UserInterface::newGameButton(){
+    _game->newGame(_map);
+    _points->setText("Points: " + QString::number(_game->get_player().get_points()));
+    _pause->setText("Pause");
     printGameTable();
 }
-
+void UserInterface::pauseButton(){
+    if(_pause->text() == "Pause"){
+        _game->set_pause(true);
+        _pause->setText("Unpause");
+    }else if(_pause->text() == "Unpause"){
+        _game->set_pause(false);
+        _pause->setText("Pause");
+    }
+}
 void UserInterface::printGameTable(){
+
+    foreach(QLabel* label, elemnts)
+    {
+        _table->removeWidget(label);
+        delete label;
+    }
+
+    elemnts.clear();
+
     for(int i=0;i<_game->get_size();++i){
         for(int j=0;j<_game->get_size();++j){
+            QLabel *_item;
             switch(_game->get_gametable_item(i,j) ) {
                 case objs::ml:
-                    _item = new QLabel("MaciLaci" + QString::number(_game->get_player().get_x()));
+                    _item = new QLabel("MaciLaci");
                     break;
                 case objs::vo:
                     _item = new QLabel("Vadőr");
                     break;
                 case objs::pk:
-                    _item = new QLabel("Piknik kosár");
+                    _item = new QLabel("Pkosár");
                     break;
                 case objs::fa:
                     _item = new QLabel("FA");
                     break;
                 case objs::cl:
-                    _item = new QLabel("Clear");
+                    _item = new QLabel("");
                     break;
             }
+            elemnts.append(_item);
+            _item->setFixedWidth(40);
+            _item->setFixedHeight(40);
             _table->addWidget(_item,i,j);
         }
     }
@@ -49,6 +135,7 @@ void UserInterface::keyPressEvent(QKeyEvent *e){
         _game->movePlayer(3);
     }
     printGameTable();
+    _points->setText("Points: " + QString::number(_game->get_player().get_points()));
 }
 
 UserInterface::~UserInterface()

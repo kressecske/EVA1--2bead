@@ -7,6 +7,7 @@ class MaciLaci
 {
 private:
     Coordinate co;
+    int points;
 public:
     MaciLaci(){}
     MaciLaci(Coordinate c);
@@ -20,6 +21,12 @@ public:
     }
     int get_y(){
         return co.y();
+    }
+    int get_points(){
+        return points;
+    }
+    void add_point(){
+        points+=1;
     }
 };
 
